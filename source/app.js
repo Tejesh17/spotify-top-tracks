@@ -6,12 +6,11 @@ const date = require('date-and-time');
 const now = new Date();
 
 const getTracks= require('./utils/getdata')
-const { error } = require('console')
-const { response } = require('express')
+const getID= require('./utils/playlist')
+const genPlaylist= require('./utils/playlist')
 
 
 const app = express()
-
 
 
 app.set('view engine','hbs')
@@ -32,7 +31,7 @@ app.get('/getdata', (req,res)=>{
     if (!req.query.token){
         console.log("no token")
     }else{
-        token = req.query.token
+        const token = req.query.token
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -49,6 +48,8 @@ app.get('/getdata', (req,res)=>{
             }
             else{
                 console.log({name, artist})
+                res.app.set('token', token)
+                res.app.set('uri',uri)
                 res.send({
                     name,
                     artist,
@@ -63,13 +64,18 @@ app.get('/getdata', (req,res)=>{
 
 
 
-
 app.get('/playlist', (req,res)=>{
     res.render('playlist')
 })
 
 
 app.get('/generateplaylist', (req,res)=>{
+    const token = res.app.get('token')
+    console.log(token)
+    const uri = res.app.get('uri')
+    date.format(now,'DD')
+    console.log(date.format(now,'DD'))
+    date.format(now, 'MMM YYYY');
 
     let headers = {
         'Accept': 'application/json',
@@ -80,52 +86,36 @@ app.get('/generateplaylist', (req,res)=>{
         url: 'https://api.spotify.com/v1/me',
         headers: headers
     };
+    let dataString = `{"name":"${date.format(now, 'MMM YY')}","description":"Your top played songs in the month of ${date.format(now, 'MMM YY')}","public":false}`;
 
-    const getID = ((options, callback)=>{
-        request(options,(error, response)=>{
-            if (error){
-                return callback('Something went wrong, please try again',undefined)
-            }
-            {
-                var userjson= JSON.parse(response.body)
-                return callback(undefined, userjson.id)    
-            }
-        })
-    })
+
+
     getID(options, (error,response)=>{
         if(error){
             console.log(error)
         }else{
             console.log(response)
-            USERID = response
-
+            const userID = response
+            optionsP = {
+                url: `https://api.spotify.com/v1/users/${response}/playlists`,
+                method: 'POST',
+                headers: headers,
+                body: dataString
+            }
+            genPlaylist (optionsP, (error,response)=>{
+                if (error){
+                    console.log(error)
+                }else{
+                    console.log(uri)
+                    console.log(response)
+                    const playlistID = response
+                }
+            })
         }
+
+
+
     })
-    date.format(now,'DD')
-    console.log(date.format(now,'DD'))
-
-    date.format(now, 'MMM YYYY');
-
-
-
-    let dataString = `{"name":"${date.format(now, 'MMM YY')}","description":"Your top played songs in the month of ","public":true}`;
-    
-    let optionsP = {
-        url: `https://api.spotify.com/v1/users/${USERID}/playlists`,
-        method: 'POST',
-        headers: headers,
-        body: dataString
-    };
-    
-    function callback(error, response, body) {
-        if (!error ){//&& response.statusCode == 200) {
-            console.log(response.body);
-        }
-    }
-    
-    request(optionsP, callback);
-
-
 
 
 

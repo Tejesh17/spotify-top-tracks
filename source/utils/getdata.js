@@ -12,7 +12,8 @@ const getTracks = ((options, callback)=>{
         }
         {
             // console.log(dat)
-            var name= [], artist= [], uri= [], art= [] 
+            let name= [], artist= [], uri= [], art= [] 
+            
             for(i=0;i<10;i++){
                 name[i]= dat.items[i].name
                 artist[i]=dat.items[i].artists[0].name
