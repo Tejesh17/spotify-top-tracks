@@ -8,6 +8,7 @@ const now = new Date();
 const getTracks= require('./utils/getdata')
 const getID= require('./utils/playlist')
 const genPlaylist= require('./utils/playlist')
+const addTracks= require('./utils/playlist')
 
 
 const app = express()
@@ -95,7 +96,6 @@ app.get('/generateplaylist', (req,res)=>{
             console.log(error)
         }else{
             console.log(response)
-            const userID = response
             optionsP = {
                 url: `https://api.spotify.com/v1/users/${response}/playlists`,
                 method: 'POST',
@@ -106,9 +106,30 @@ app.get('/generateplaylist', (req,res)=>{
                 if (error){
                     console.log(error)
                 }else{
-                    console.log(uri)
+                    // console.log(uri)
                     console.log(response)
-                    const playlistID = response
+
+
+
+
+                    var options = {
+                        url: `https://api.spotify.com/v1/playlists/${response}/tracks?uris=${encodeURIComponent(uri)}`,
+                        method: 'POST',
+                        headers: headers
+                    };
+
+
+
+                    addTracks(options,(error, response)=>{
+                        if (error)
+                        {
+                            console.log(error)
+                        }else {
+                            console.log(response)
+                        }
+                    })
+
+
                 }
             })
         }
