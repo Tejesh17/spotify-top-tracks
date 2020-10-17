@@ -8,7 +8,7 @@ const now = new Date();
 const getTracks= require('./utils/getdata')
 const getID= require('./utils/playlist')
 const genPlaylist= require('./utils/playlist')
-const addTracks= require('./utils/playlist')
+const addTracks= require('./utils/addtrack.js')
 
 
 const app = express()
@@ -54,7 +54,6 @@ app.get('/getdata', (req,res)=>{
                 res.send({
                     name,
                     artist,
-                    uri,
                     art
                 })
             }
@@ -75,9 +74,9 @@ app.get('/generateplaylist', (req,res)=>{
     console.log(token)
     const uri = res.app.get('uri')
     date.format(now,'DD')
-    console.log(date.format(now,'DD'))
-    date.format(now, 'MMM YYYY');
-
+    if ((date.format(now,'DD'))<15){
+        now = new Date(now.setMonth(now.getMonth() - 1))
+    }
     let headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -87,15 +86,14 @@ app.get('/generateplaylist', (req,res)=>{
         url: 'https://api.spotify.com/v1/me',
         headers: headers
     };
-    let dataString = `{"name":"${date.format(now, 'MMM YY')}","description":"Your top played songs in the month of ${date.format(now, 'MMM YY')}","public":false}`;
-
-
+    let dataString = `{"name":"${date.format(now, 'MMM')} \'${date.format(now, 'YY')} ","description":"Your top played songs in the month of ${date.format(now, 'MMMM YYYY')}.","public":false}`;
 
     getID(options, (error,response)=>{
         if(error){
             console.log(error)
+            res.send({error})
         }else{
-            console.log(response)
+            // console.log(response)
             optionsP = {
                 url: `https://api.spotify.com/v1/users/${response}/playlists`,
                 method: 'POST',
@@ -105,12 +103,10 @@ app.get('/generateplaylist', (req,res)=>{
             genPlaylist (optionsP, (error,response)=>{
                 if (error){
                     console.log(error)
+                    res.send({error})
                 }else{
                     // console.log(uri)
                     console.log(response)
-
-
-
 
                     var options = {
                         url: `https://api.spotify.com/v1/playlists/${response}/tracks?uris=${encodeURIComponent(uri)}`,
@@ -118,14 +114,14 @@ app.get('/generateplaylist', (req,res)=>{
                         headers: headers
                     };
 
-
-
                     addTracks(options,(error, response)=>{
                         if (error)
                         {
                             console.log(error)
+                            res.send({error})
                         }else {
                             console.log(response)
+                            res.send({reponse:'200'})
                         }
                     })
 
@@ -133,14 +129,7 @@ app.get('/generateplaylist', (req,res)=>{
                 }
             })
         }
-
-
-
     })
-
-
-
-
 })
 
 
