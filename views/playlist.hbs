@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<head>
 
-
-
-        <title>Home</title>
-    
-    </head>
-
-    <body>
-        <h3>ho lee fuk</h3>
-        
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
 
-        
-            <script>
-            fetch('/generateplaylist').then((response)=>{
-            response.json().then((data)=>{
+    <title>Home</title>
+
+</head>
+
+<body>
+    <h3>ho lee fuk</h3>
+
+
+
+
+
+    <script>
+        fetch('/generateplaylist').then((response) => {
+            response.json().then((data) => {
                 console.log(data)
             })
-            })
-            </script>
+        })
+    </script>
 
-        
-    </body>
+
+</body>
 
 
 </html>
